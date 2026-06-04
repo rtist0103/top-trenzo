@@ -74,9 +74,9 @@ export function HeroCarousel({ articles }: Props) {
   if (!articles || articles.length === 0) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl group border bg-black shadow-lg w-full h-full">
-      {/* Slides wrapper */}
-      <div className="relative min-h-95 md:min-h-125 w-full">
+    <div className="relative overflow-hidden rounded-2xl group border bg-card shadow-lg w-full h-full flex flex-col">
+      {/* Image area */}
+      <div className="relative w-full aspect-[16/8] md:aspect-[16/7] overflow-hidden bg-black">
         {articles.map((article, idx) => {
           const isActive = idx === currentIndex;
           return (
@@ -86,7 +86,6 @@ export function HeroCarousel({ articles }: Props) {
                 isActive ? "opacity-100 scale-100 z-10" : "opacity-0 scale-105 pointer-events-none z-0"
               }`}
             >
-              {/* Background Image / Gradient */}
               {article.featured_image ? (
                 <Image
                   src={article.featured_image}
@@ -94,78 +93,87 @@ export function HeroCarousel({ articles }: Props) {
                   fill
                   priority={idx === 0}
                   sizes="(max-width: 1280px) 100vw, 1280px"
-                  className="object-cover opacity-85 group-hover:scale-[1.02] transition-transform duration-8000 ease-out"
+                  className="object-cover group-hover:scale-[1.02] transition-transform duration-8000 ease-out"
                 />
               ) : (
-                <div className="absolute inset-0 hero-gradient opacity-90" />
+                <div className="absolute inset-0 hero-gradient" />
               )}
+            </div>
+          );
+        })}
 
-              {/* Rich Overlay Gradient */}
-              <div className="absolute inset-0 bg-linear-to-t from-black via-black/40 to-black/10 md:from-black/95 md:via-black/50" />
+        {/* Navigation Chevrons - positioned over the image */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary border border-white/10 hover:border-transparent"
+          aria-label="Previous slide"
+        >
+          <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+        </button>
+        <button
+          onClick={handleNext}
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary border border-white/10 hover:border-transparent"
+          aria-label="Next slide"
+        >
+          <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+        </button>
+      </div>
 
-              {/* Content Panel */}
-              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 text-white flex flex-col justify-end h-full">
-                <div className="max-w-3xl space-y-4">
-                  {/* Category badge */}
+      {/* Content area below image */}
+      <div className="relative p-5 md:p-8 flex flex-col gap-3">
+        {articles.map((article, idx) => {
+          const isActive = idx === currentIndex;
+          return (
+            <div
+              key={article.id}
+              className={`transition-all duration-500 ease-in-out ${
+                isActive ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 p-5 md:p-8 pointer-events-none z-0"
+              }`}
+            >
+              <div className="space-y-3">
+                {/* Category badge + Date row */}
+                <div className="flex items-center gap-3 flex-wrap">
                   {article.category && (
-                    <span className="inline-block bg-primary text-white text-[10px] md:text-xs font-black uppercase tracking-widest px-3.5 py-1 rounded-sm shadow-md animate-fade-in">
+                    <span className="inline-block bg-primary text-white text-[10px] md:text-xs font-black uppercase tracking-widest px-3 py-0.5 rounded-sm">
                       {article.category.name}
                     </span>
                   )}
-
-                  {/* Title */}
-                  <Link href={`/news/${article.slug}`} className="block">
-                    <h1 className="text-2xl md:text-5xl font-black tracking-tight leading-[1.1] hover:text-primary transition-colors duration-300 line-clamp-3 cursor-pointer">
-                      {article.title}
-                    </h1>
-                  </Link>
-
-                  {/* Summary */}
-                  <p className="text-white/80 text-xs md:text-base font-medium line-clamp-2 leading-relaxed max-w-2xl">
-                    {article.summary}
-                  </p>
-
-                  {/* Date & Read More */}
-                  <div className="flex items-center gap-4 pt-2">
-                    {article.published_at && (
-                      <span className="text-white/60 text-xs flex items-center gap-1.5 font-semibold">
-                        <Clock className="h-3.5 w-3.5 text-primary" />
-                        {formatDate(article.published_at)}
-                      </span>
-                    )}
-                    <Link
-                      href={`/news/${article.slug}`}
-                      className="hidden sm:inline-flex items-center text-xs font-bold text-primary hover:text-white transition-colors gap-1 group/btn"
-                    >
-                      Read Article
-                      <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
-                    </Link>
-                  </div>
+                  {article.published_at && (
+                    <span className="text-muted-foreground text-xs flex items-center gap-1.5 font-semibold">
+                      <Clock className="h-3.5 w-3.5 text-primary" />
+                      {formatDate(article.published_at)}
+                    </span>
+                  )}
                 </div>
+
+                {/* Title */}
+                <Link href={`/news/${article.slug}`} className="block">
+                  <h2 className="text-xl md:text-3xl font-black tracking-tight leading-tight hover:text-primary transition-colors duration-300 line-clamp-2 cursor-pointer text-foreground">
+                    {article.title}
+                  </h2>
+                </Link>
+
+                {/* Summary */}
+                <p className="text-muted-foreground text-sm md:text-base font-medium line-clamp-2 leading-relaxed max-w-3xl">
+                  {article.summary}
+                </p>
+
+                {/* Read More */}
+                <Link
+                  href={`/news/${article.slug}`}
+                  className="inline-flex items-center text-sm font-bold text-primary hover:text-primary/80 transition-colors gap-1 group/btn pt-1"
+                >
+                  Read Full Article
+                  <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
+                </Link>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Navigation Chevrons */}
-      <button
-        onClick={handlePrev}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary border border-white/10 hover:border-transparent"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
-      <button
-        onClick={handleNext}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-20 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-md opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-primary border border-white/10 hover:border-transparent"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-      </button>
-
-      {/* Modern Slide Indicators with Timers */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2.5">
+      {/* Slide Indicators */}
+      <div className="px-5 md:px-8 pb-5 md:pb-6 flex gap-2.5 z-20">
         {articles.map((_, index) => {
           const isSelected = index === currentIndex;
           return (

@@ -76,7 +76,7 @@ export function HeroCarousel({ articles }: Props) {
   return (
     <div className="relative overflow-hidden rounded-2xl group border bg-card shadow-lg w-full h-full flex flex-col">
       {/* Image area */}
-      <div className="relative w-full aspect-[16/8] md:aspect-[16/7] overflow-hidden bg-black">
+      <div className="relative w-full h-48 md:h-72 shrink-0 overflow-hidden bg-black">
         {articles.map((article, idx) => {
           const isActive = idx === currentIndex;
           return (
@@ -120,27 +120,27 @@ export function HeroCarousel({ articles }: Props) {
       </div>
 
       {/* Content area below image */}
-      <div className="relative p-5 md:p-8 flex flex-col gap-3">
+      <div className="relative p-4 md:p-6 flex flex-col gap-2">
         {articles.map((article, idx) => {
           const isActive = idx === currentIndex;
           return (
             <div
               key={article.id}
               className={`transition-all duration-500 ease-in-out ${
-                isActive ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 p-5 md:p-8 pointer-events-none z-0"
+                isActive ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 p-4 md:p-6 pointer-events-none z-0"
               }`}
             >
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {/* Category badge + Date row */}
                 <div className="flex items-center gap-3 flex-wrap">
                   {article.category && (
-                    <span className="inline-block bg-primary text-white text-[10px] md:text-xs font-black uppercase tracking-widest px-3 py-0.5 rounded-sm">
+                    <span className="inline-block bg-primary text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-sm">
                       {article.category.name}
                     </span>
                   )}
                   {article.published_at && (
-                    <span className="text-muted-foreground text-xs flex items-center gap-1.5 font-semibold">
-                      <Clock className="h-3.5 w-3.5 text-primary" />
+                    <span className="text-muted-foreground text-[11px] flex items-center gap-1.5 font-semibold">
+                      <Clock className="h-3 w-3 text-primary" />
                       {formatDate(article.published_at)}
                     </span>
                   )}
@@ -148,20 +148,20 @@ export function HeroCarousel({ articles }: Props) {
 
                 {/* Title */}
                 <Link href={`/news/${article.slug}`} className="block">
-                  <h2 className="text-xl md:text-3xl font-black tracking-tight leading-tight hover:text-primary transition-colors duration-300 line-clamp-2 cursor-pointer text-foreground">
+                  <h2 className="text-lg md:text-2xl font-bold tracking-tight leading-snug hover:text-primary transition-colors duration-300 line-clamp-2 cursor-pointer text-foreground">
                     {article.title}
                   </h2>
                 </Link>
 
                 {/* Summary */}
-                <p className="text-muted-foreground text-sm md:text-base font-medium line-clamp-2 leading-relaxed max-w-3xl">
+                <p className="text-muted-foreground text-xs md:text-sm font-medium line-clamp-2 leading-relaxed max-w-3xl">
                   {article.summary}
                 </p>
 
                 {/* Read More */}
                 <Link
                   href={`/news/${article.slug}`}
-                  className="inline-flex items-center text-sm font-bold text-primary hover:text-primary/80 transition-colors gap-1 group/btn pt-1"
+                  className="inline-flex items-center text-xs font-bold text-primary hover:text-primary/80 transition-colors gap-1 group/btn pt-0.5"
                 >
                   Read Full Article
                   <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
@@ -173,7 +173,7 @@ export function HeroCarousel({ articles }: Props) {
       </div>
 
       {/* Slide Indicators */}
-      <div className="px-5 md:px-8 pb-5 md:pb-6 flex gap-2.5 z-20">
+      <div className="px-4 md:px-6 pb-4 md:pb-5 flex gap-2.5 z-20">
         {articles.map((_, index) => {
           const isSelected = index === currentIndex;
           return (

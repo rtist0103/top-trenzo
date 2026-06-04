@@ -4,14 +4,31 @@ import type { Category } from "@/features/categories/queries/get-categories";
 export async function getAllCategories(): Promise<Category[]> {
   const supabase = await createClient();
 
-  const { data, error } = await supabase
-    .from("categories")
-    .select("id, name, slug")
-    .order("name");
+  const [catRes, orderRes] = await Promise.all([
+    supabase.from("categories").select("id, name, slug"),
+    supabase.from("site_settings").select("value").eq("key", "category_order").single(),
+  ]);
 
-  if (error) throw new Error(error.message);
+  if (catRes.error) throw new Error(catRes.error.message);
 
-  return data ?? [];
+  let order: string[] = [];
+  try {
+    if (orderRes.data?.value) {
+      order = JSON.parse(orderRes.data.value);
+    }
+  } catch {}
+
+  const categories = catRes.data ?? [];
+  categories.sort((a, b) => {
+    const aIdx = order.indexOf(a.id);
+    const bIdx = order.indexOf(b.id);
+    if (aIdx === -1 && bIdx === -1) return a.name.localeCompare(b.name);
+    if (aIdx === -1) return 1;
+    if (bIdx === -1) return -1;
+    return aIdx - bIdx;
+  });
+
+  return categories;
 }
 
 export async function getCategoryBySlug(

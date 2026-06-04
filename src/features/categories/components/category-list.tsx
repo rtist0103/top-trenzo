@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Trash2, Pencil, Check, X } from "lucide-react";
+import { useState, useTransition } from "react";
+import { Trash2, Pencil, Check, X, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -14,12 +14,14 @@ type Props = {
   categories: Category[];
   deleteCategory: (formData: FormData) => Promise<void>;
   renameCategory: (formData: FormData) => Promise<void>;
+  reorderCategories?: (formData: FormData) => Promise<void>;
 };
 
-export function CategoryList({ categories, deleteCategory, renameCategory }: Props) {
+export function CategoryList({ categories, deleteCategory, renameCategory, reorderCategories }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [pending, setPending] = useState<string | null>(null);
+  const [isPendingOrder, startTransitionOrder] = useTransition();
 
   if (categories.length === 0) {
     return (
@@ -61,9 +63,36 @@ export function CategoryList({ categories, deleteCategory, renameCategory }: Pro
     }
   }
 
+  const moveCategory = (index: number, direction: "up" | "down") => {
+    if (!reorderCategories) return;
+    if (direction === "up" && index === 0) return;
+    if (direction === "down" && index === categories.length - 1) return;
+
+    const newOrder = [...categories];
+    const targetIndex = direction === "up" ? index - 1 : index + 1;
+    
+    const temp = newOrder[index];
+    if (temp && newOrder[targetIndex]) {
+      newOrder[index] = newOrder[targetIndex] as Category;
+      newOrder[targetIndex] = temp;
+    }
+
+    const fd = new FormData();
+    fd.set("order", JSON.stringify(newOrder.map((c) => c.id)));
+
+    startTransitionOrder(async () => {
+      try {
+        await reorderCategories(fd);
+        toast.success("Categories reordered.");
+      } catch {
+        toast.error("Failed to reorder categories.");
+      }
+    });
+  };
+
   return (
     <div className="divide-y">
-      {categories.map((cat) => (
+      {categories.map((cat, index) => (
         <div key={cat.id} className="flex items-center justify-between px-4 py-3 hover:bg-muted/40">
           {editingId === cat.id ? (
             <div className="flex items-center gap-2 flex-1 mr-3">
@@ -96,9 +125,33 @@ export function CategoryList({ categories, deleteCategory, renameCategory }: Pro
               </Button>
             </div>
           ) : (
-            <div className="min-w-0">
-              <p className="text-sm font-medium">{cat.name}</p>
-              <p className="text-xs text-muted-foreground font-mono">/{cat.slug}</p>
+            <div className="flex items-center min-w-0 flex-1">
+              {reorderCategories && (
+                <div className="flex flex-col mr-3 opacity-50 hover:opacity-100 transition-opacity">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-5 w-5 disabled:opacity-30"
+                    disabled={index === 0 || isPendingOrder}
+                    onClick={() => moveCategory(index, "up")}
+                  >
+                    <ArrowUp className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-5 w-5 disabled:opacity-30"
+                    disabled={index === categories.length - 1 || isPendingOrder}
+                    onClick={() => moveCategory(index, "down")}
+                  >
+                    <ArrowDown className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+              <div className="min-w-0">
+                <p className="text-sm font-medium">{cat.name}</p>
+                <p className="text-xs text-muted-foreground font-mono">/{cat.slug}</p>
+              </div>
             </div>
           )}
 

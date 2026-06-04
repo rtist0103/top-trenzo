@@ -3,7 +3,7 @@ import { ShieldCheck, Newspaper, Zap, Globe } from "lucide-react";
 import { GoogleLoginButton } from "@/features/auth/components/google-login-button";
 
 export const metadata: Metadata = {
-  title: "Admin Login — Briefly",
+  title: "Admin Login — TopTrenzo",
   robots: { index: false, follow: false },
 };
 
@@ -34,7 +34,7 @@ export default function AdminLoginPage() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Newspaper className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold tracking-tight">Briefly</span>
+          <span className="text-xl font-bold tracking-tight">TopTrenzo</span>
         </div>
 
         {/* Copy */}
@@ -67,7 +67,7 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <p className="relative z-10 text-white/30 text-xs">
-          © {new Date().getFullYear()} Briefly. All rights reserved.
+          © {new Date().getFullYear()} TopTrenzo. All rights reserved.
         </p>
       </div>
 
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
             <Newspaper className="h-4 w-4 text-primary-foreground" />
           </div>
-          <span className="text-xl font-bold">Briefly</span>
+          <span className="text-xl font-bold">TopTrenzo</span>
         </div>
 
         <div className="w-full max-w-85 space-y-7">

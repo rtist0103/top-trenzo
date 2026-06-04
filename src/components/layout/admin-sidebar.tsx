@@ -58,7 +58,7 @@ export function AdminSidebar() {
 
       {/* Footer */}
       <div className="p-4 border-t border-zinc-800">
-        <p className="text-xs text-zinc-600">© {new Date().getFullYear()} Briefly</p>
+        <p className="text-xs text-zinc-600">© {new Date().getFullYear()} TopTrenzo. All rights reserved.</p>
       </div>
     </aside>
   );

@@ -1,0 +1,21 @@
+/* Make editor surface match app */
+.bn-container,
+.bn-editor {
+  background: transparent !important;
+}
+
+/* Remove harsh black/white separation */
+.bn-root {
+  border: none !important;
+}
+
+/* Better dark mode toolbar blending */
+.dark .bn-toolbar,
+.dark .bn-formatting-toolbar {
+  border-color: hsl(var(--border)) !important;
+}
+
+/* Make popup menus fit dark UI better */
+.dark [data-floating-ui-portal] {
+  color: hsl(var(--foreground));
+}

@@ -79,7 +79,7 @@ export default async function HomePage() {
         <div className="ticker-bar mb-6 overflow-hidden rounded-lg flex">
           <span className="ticker-label">
             <span className="ticker-dot live-pulse" />
-            Trending
+            Live
           </span>
           <div className="overflow-hidden flex-1 py-2 text-xs font-bold">
             <div className="ticker-content">

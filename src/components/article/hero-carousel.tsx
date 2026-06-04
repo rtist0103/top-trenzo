@@ -120,17 +120,17 @@ export function HeroCarousel({ articles }: Props) {
       </div>
 
       {/* Content area below image */}
-      <div className="relative p-4 md:p-6 flex flex-col gap-2">
+      <div className="relative h-44 md:h-52 shrink-0 overflow-hidden">
         {articles.map((article, idx) => {
           const isActive = idx === currentIndex;
           return (
             <div
               key={article.id}
               className={`transition-all duration-500 ease-in-out ${
-                isActive ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 p-4 md:p-6 pointer-events-none z-0"
+                isActive ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 pointer-events-none z-0"
               }`}
             >
-              <div className="space-y-2">
+              <div className="space-y-2 p-4 md:p-6">
                 {/* Category badge + Date row */}
                 <div className="flex items-center gap-3 flex-wrap">
                   {article.category && (

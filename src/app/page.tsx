@@ -64,8 +64,7 @@ export default async function HomePage() {
     ? featuredTrending
     : allArticles.slice(0, 5);
 
-  const latestArticles = allArticles
-    .filter((a) => !carouselArticles.some((c) => c.id === a.id));
+  const latestArticles = allArticles;
 
   return (
     <PublicLayout>

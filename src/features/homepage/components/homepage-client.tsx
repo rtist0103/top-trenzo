@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Trash2, ChevronUp, ChevronDown, Plus,
-  Search, Star, TrendingUp, ImageOff, Loader2,
+  Search, Star, TrendingUp, ImageOff, Loader2, Radio,
 } from "lucide-react";
 
 import { Card } from "@/components/ui/card";
@@ -18,13 +18,14 @@ import type { PublicArticle } from "@/repositories/article.repositories";
 type Props = {
   heroSlots: FeaturedSlot[];
   trendingSlots: FeaturedSlot[];
+  liveSlots: FeaturedSlot[];
   allArticles: PublicArticle[];
   onAdd: (formData: FormData) => Promise<void>;
   onRemove: (formData: FormData) => Promise<void>;
   onReorder: (formData: FormData) => Promise<void>;
 };
 
-const LIMITS = { hero: 5, trending: 4 };
+const LIMITS = { hero: 5, trending: 4, live: 10 };
 
 // ── Article picker ────────────────────────────────────────────
 
@@ -37,7 +38,7 @@ function ArticlePicker({
 }: {
   articles: PublicArticle[];
   usedIds: Set<string>;
-  slot: "hero" | "trending";
+  slot: "hero" | "trending" | "live";
   slotCount: number;
   onAdd: (formData: FormData) => Promise<void>;
 }) {
@@ -287,7 +288,7 @@ function SectionPanel({
   description: string;
   icon: typeof Star;
   slots: FeaturedSlot[];
-  slot: "hero" | "trending";
+  slot: "hero" | "trending" | "live";
   allArticles: PublicArticle[];
   onAdd: (formData: FormData) => Promise<void>;
   onRemove: (formData: FormData) => Promise<void>;
@@ -348,30 +349,45 @@ function SectionPanel({
 export function HomepageClient({
   heroSlots,
   trendingSlots,
+  liveSlots,
   allArticles,
   onAdd,
   onRemove,
   onReorder,
 }: Props) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SectionPanel
+          title="Hero Carousel"
+          description={`Up to ${LIMITS.hero} articles. First article shows first in the carousel.`}
+          icon={Star}
+          slots={heroSlots}
+          slot="hero"
+          allArticles={allArticles}
+          onAdd={onAdd}
+          onRemove={onRemove}
+          onReorder={onReorder}
+        />
+        <SectionPanel
+          title="Trending Sidebar"
+          description={`Up to ${LIMITS.trending} articles shown in the Trending Now widget.`}
+          icon={TrendingUp}
+          slots={trendingSlots}
+          slot="trending"
+          allArticles={allArticles}
+          onAdd={onAdd}
+          onRemove={onRemove}
+          onReorder={onReorder}
+        />
+      </div>
+
       <SectionPanel
-        title="Hero Carousel"
-        description={`Up to ${LIMITS.hero} articles. First article shows first in the carousel.`}
-        icon={Star}
-        slots={heroSlots}
-        slot="hero"
-        allArticles={allArticles}
-        onAdd={onAdd}
-        onRemove={onRemove}
-        onReorder={onReorder}
-      />
-      <SectionPanel
-        title="Trending Sidebar"
-        description={`Up to ${LIMITS.trending} articles shown in the Trending Now widget.`}
-        icon={TrendingUp}
-        slots={trendingSlots}
-        slot="trending"
+        title="Live Ticker Banner"
+        description={`Up to ${LIMITS.live} articles shown in the top live ticker. These articles cycle through as breaking news.`}
+        icon={Radio}
+        slots={liveSlots}
+        slot="live"
         allArticles={allArticles}
         onAdd={onAdd}
         onRemove={onRemove}

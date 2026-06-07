@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { TrendingUp, ChevronRight, Flame } from "lucide-react";
 
@@ -46,10 +47,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [allArticles, featuredHero, featuredTrending, categories] = await Promise.all([
+  const [allArticles, featuredHero, featuredTrending, featuredLive, categories] = await Promise.all([
     getPublishedArticles({ limit: 50 }),
     getFeaturedArticles("hero", 5),
     getFeaturedArticles("trending", 4),
+    getFeaturedArticles("live", 10),
     getAllCategories(),
   ]);
 
@@ -63,12 +65,17 @@ export default async function HomePage() {
     ? featuredTrending.slice(0, 4)
     : allArticles.slice(0, 4);
 
+  // Live ticker: use pinned articles if set, otherwise fall back to most viewed (limited to 10)
+  const liveTickerArticles = featuredLive.length > 0
+    ? featuredLive.slice(0, 10)
+    : mostViewed.slice(0, 10);
+
   const latestArticles = allArticles;
 
   return (
     <PublicLayout>
-      {/* ── Trending TICKER — uses pinned trending articles (max 4) ── */}
-      {mostViewed.length > 0 && (
+      {/* ── LIVE TICKER BANNER — uses pinned live articles (max 10) ── */}
+      {liveTickerArticles.length > 0 && (
         <div className="ticker-bar mb-6 overflow-hidden rounded-lg flex">
           <span className="ticker-label">
             <span className="ticker-dot live-pulse" />
@@ -76,7 +83,7 @@ export default async function HomePage() {
           </span>
           <div className="overflow-hidden flex-1 py-2 text-xs font-bold">
             <div className="ticker-content">
-              {[...mostViewed, ...mostViewed].map((a, i) => (
+              {[...liveTickerArticles, ...liveTickerArticles].map((a, i) => (
                 <Link
                   key={i}
                   href={`/news/${a.slug}`}
@@ -100,8 +107,8 @@ export default async function HomePage() {
             </div>
 
             {/* Trending Now - Fixed height matching hero carousel (500px) */}
-            <div className="rounded-2xl border bg-card p-5 shadow-lg flex flex-col h-125">
-              <div className="section-heading mb-4 shrink-0">
+            <div className="rounded-2xl border bg-card p-5 shadow-lg flex flex-col" style={{ height: "500px" }}>
+              <div className="section-heading mb-4 flex-shrink-0">
                 <h3 className="text-base font-bold uppercase tracking-tight flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-primary" />
                   Trending Now
@@ -113,7 +120,7 @@ export default async function HomePage() {
                   <Link
                     key={article.id}
                     href={`/news/${article.slug}`}
-                    className="group flex gap-3 shrink-0"
+                    className="group flex gap-3 flex-shrink-0"
                   >
                     <span className="trending-number w-8 shrink-0 mt-0.5 group-hover:text-primary/40!">
                       {String(i + 1).padStart(2, "0")}
@@ -170,7 +177,7 @@ export default async function HomePage() {
               {latestArticles.slice(0, 10).map((article) => (
                 <div
                   key={article.id}
-                  className="w-70 sm:w-[320px] shrink-0 snap-start"
+                  className="w-[280px] sm:w-[320px] shrink-0 snap-start"
                 >
                   <ArticleCard
                     title={article.title}
@@ -217,7 +224,7 @@ export default async function HomePage() {
                   {catArticles.slice(0, 8).map((article) => (
                     <div
                       key={article.id}
-                      className="w-70 sm:w-[320px] shrink-0 snap-start"
+                      className="w-[280px] sm:w-[320px] shrink-0 snap-start"
                     >
                       <ArticleCard
                         title={article.title}

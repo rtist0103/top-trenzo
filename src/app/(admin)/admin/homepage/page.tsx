@@ -16,7 +16,7 @@ import { HomepageClient } from "@/features/homepage/components/homepage-client";
 
 async function actionAdd(formData: FormData) {
   "use server";
-  const slot = formData.get("slot") as "hero" | "trending";
+  const slot = formData.get("slot") as "hero" | "trending" | "live";
   const articleId = formData.get("article_id") as string;
   const sortOrder = Number(formData.get("sort_order") ?? 99);
   if (!slot || !articleId) return;
@@ -45,9 +45,10 @@ async function actionReorder(formData: FormData) {
 // ── Page ─────────────────────────────────────────────────────
 
 export default async function HomepagePage() {
-  const [heroSlots, trendingSlots, allArticles] = await Promise.all([
+  const [heroSlots, trendingSlots, liveSlots, allArticles] = await Promise.all([
     getFeaturedSlots("hero"),
     getFeaturedSlots("trending"),
+    getFeaturedSlots("live"),
     getPublishedArticles({ limit: 100 }),
   ]);
 
@@ -59,7 +60,7 @@ export default async function HomepagePage() {
           Homepage Sections
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Control which articles appear in the Hero carousel and Trending sidebar.
+          Control which articles appear in the Hero carousel, Trending sidebar, and Live ticker banner.
           Changes go live immediately.
         </p>
       </div>
@@ -67,6 +68,7 @@ export default async function HomepagePage() {
       <HomepageClient
         heroSlots={heroSlots}
         trendingSlots={trendingSlots}
+        liveSlots={liveSlots}
         allArticles={allArticles}
         onAdd={actionAdd}
         onRemove={actionRemove}

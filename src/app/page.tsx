@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { TrendingUp, ChevronRight, Flame } from "lucide-react";
 
@@ -50,7 +49,7 @@ export default async function HomePage() {
   const [allArticles, featuredHero, featuredTrending, categories] = await Promise.all([
     getPublishedArticles({ limit: 50 }),
     getFeaturedArticles("hero", 5),
-    getFeaturedArticles("trending", 7),
+    getFeaturedArticles("trending", 4),
     getAllCategories(),
   ]);
 
@@ -59,16 +58,16 @@ export default async function HomePage() {
     ? featuredHero
     : allArticles.slice(0, 4);
 
-  // Trending: use pinned articles if set, otherwise fall back to latest
+  // Trending: use pinned articles if set, otherwise fall back to latest (limited to 4 items)
   const mostViewed = featuredTrending.length > 0
-    ? featuredTrending
-    : allArticles.slice(0, 5);
+    ? featuredTrending.slice(0, 4)
+    : allArticles.slice(0, 4);
 
   const latestArticles = allArticles;
 
   return (
     <PublicLayout>
-      {/* ── Trending TICKER — uses pinned trending articles ── */}
+      {/* ── Trending TICKER — uses pinned trending articles (max 4) ── */}
       {mostViewed.length > 0 && (
         <div className="ticker-bar mb-6 overflow-hidden rounded-lg flex">
           <span className="ticker-label">
@@ -95,34 +94,34 @@ export default async function HomePage() {
       {carouselArticles.length > 0 && (
         <section className="mb-8 p-1">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main hero - Carousel */}
+            {/* Main hero - Carousel with fixed height */}
             <div className="lg:col-span-2">
               <HeroCarousel articles={carouselArticles} />
             </div>
 
-            {/* Trending Now */}
-            <div className="rounded-2xl border bg-card p-5 shadow-lg flex flex-col h-full">
-              <div className="section-heading mb-4">
+            {/* Trending Now - Fixed height matching hero carousel (500px) */}
+            <div className="rounded-2xl border bg-card p-5 shadow-lg flex flex-col h-125">
+              <div className="section-heading mb-4 shrink-0">
                 <h3 className="text-base font-bold uppercase tracking-tight flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-primary" />
                   Trending Now
                 </h3>
               </div>
 
-              <div className="space-y-4 overflow-y-auto scrollbar-thin pr-2 flex-1">
-                {mostViewed.map((article, i) => (
+              <div className="space-y-4 overflow-y-auto scrollbar-thin pr-2 flex-1 min-h-0">
+                {mostViewed.slice(0, 4).map((article, i) => (
                   <Link
                     key={article.id}
                     href={`/news/${article.slug}`}
-                    className="group flex gap-3"
+                    className="group flex gap-3 shrink-0"
                   >
                     <span className="trending-number w-8 shrink-0 mt-0.5 group-hover:text-primary/40!">
                       {String(i + 1).padStart(2, "0")}
                     </span>
 
-                    <div>
+                    <div className="min-w-0 flex-1">
                       {article.category && (
-                        <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-wider block">
                           {article.category.name}
                         </span>
                       )}
@@ -149,7 +148,7 @@ export default async function HomePage() {
 
       {/* ── MAIN CONTENT (Full Width) ── */}
       <div className="space-y-10 min-w-0">
-        {/* ── LATEST NEWS ── */}
+        {/* ── TOP NEWS BANNER (10 items) ── */}
         {latestArticles.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-5">
@@ -171,7 +170,7 @@ export default async function HomePage() {
               {latestArticles.slice(0, 10).map((article) => (
                 <div
                   key={article.id}
-                  className="w-[280px] sm:w-[320px] shrink-0 snap-start"
+                  className="w-70 sm:w-[320px] shrink-0 snap-start"
                 >
                   <ArticleCard
                     title={article.title}
@@ -218,7 +217,7 @@ export default async function HomePage() {
                   {catArticles.slice(0, 8).map((article) => (
                     <div
                       key={article.id}
-                      className="w-[280px] sm:w-[320px] shrink-0 snap-start"
+                      className="w-70 sm:w-[320px] shrink-0 snap-start"
                     >
                       <ArticleCard
                         title={article.title}

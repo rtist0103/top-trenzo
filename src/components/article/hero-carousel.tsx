@@ -74,9 +74,9 @@ export function HeroCarousel({ articles }: Props) {
   if (!articles || articles.length === 0) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl group border bg-card shadow-lg w-full h-full flex flex-col">
-      {/* Image area */}
-      <div className="relative w-full h-48 md:h-72 shrink-0 overflow-hidden bg-black">
+    <div className="relative overflow-hidden rounded-2xl group border bg-card shadow-lg w-full flex flex-col h-125">
+      {/* Image area - Fixed height */}
+      <div className="relative w-full shrink-0 overflow-hidden bg-black h-70">
         {articles.map((article, idx) => {
           const isActive = idx === currentIndex;
           return (
@@ -119,27 +119,27 @@ export function HeroCarousel({ articles }: Props) {
         </button>
       </div>
 
-      {/* Content area below image */}
-      <div className="relative h-44 md:h-52 shrink-0 overflow-hidden">
+      {/* Content area below image - Fixed height with overflow handling */}
+      <div className="relative flex-1 min-h-0 overflow-hidden flex flex-col">
         {articles.map((article, idx) => {
           const isActive = idx === currentIndex;
           return (
             <div
               key={article.id}
-              className={`transition-all duration-500 ease-in-out ${
+              className={`transition-all duration-500 ease-in-out flex flex-col min-h-0 ${
                 isActive ? "opacity-100 relative z-10" : "opacity-0 absolute inset-0 pointer-events-none z-0"
               }`}
             >
-              <div className="space-y-2 p-4 md:p-6">
+              <div className="space-y-2 p-4 md:p-6 flex-1 min-h-0 flex flex-col overflow-hidden">
                 {/* Category badge + Date row */}
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-3 flex-wrap shrink-0">
                   {article.category && (
                     <span className="inline-block bg-primary text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded-sm">
                       {article.category.name}
                     </span>
                   )}
                   {article.published_at && (
-                    <span className="text-muted-foreground text-[11px] flex items-center gap-1.5 font-semibold">
+                    <span className="text-muted-foreground text-[11px] flex items-center gap-1.5 font-semibold shrink-0">
                       <Clock className="h-3 w-3 text-primary" />
                       {formatDate(article.published_at)}
                     </span>
@@ -147,21 +147,21 @@ export function HeroCarousel({ articles }: Props) {
                 </div>
 
                 {/* Title */}
-                <Link href={`/news/${article.slug}`} className="block">
+                <Link href={`/news/${article.slug}`} className="block shrink-0">
                   <h2 className="text-lg md:text-2xl font-bold tracking-tight leading-snug hover:text-primary transition-colors duration-300 line-clamp-2 cursor-pointer text-foreground">
                     {article.title}
                   </h2>
                 </Link>
 
                 {/* Summary */}
-                <p className="text-muted-foreground text-xs md:text-sm font-medium line-clamp-2 leading-relaxed max-w-3xl">
+                <p className="text-muted-foreground text-xs md:text-sm font-medium line-clamp-2 leading-relaxed max-w-3xl shrink-0">
                   {article.summary}
                 </p>
 
                 {/* Read More */}
                 <Link
                   href={`/news/${article.slug}`}
-                  className="inline-flex items-center text-xs font-bold text-primary hover:text-primary/80 transition-colors gap-1 group/btn pt-0.5"
+                  className="inline-flex items-center text-xs font-bold text-primary hover:text-primary/80 transition-colors gap-1 group/btn pt-0.5 shrink-0"
                 >
                   Read Full Article
                   <span className="group-hover/btn:translate-x-1 transition-transform">→</span>
@@ -173,7 +173,7 @@ export function HeroCarousel({ articles }: Props) {
       </div>
 
       {/* Slide Indicators */}
-      <div className="px-4 md:px-6 pb-4 md:pb-5 flex gap-2.5 z-20">
+      <div className="px-4 md:px-6 pb-4 md:pb-5 flex gap-2.5 z-20 shrink-0">
         {articles.map((_, index) => {
           const isSelected = index === currentIndex;
           return (

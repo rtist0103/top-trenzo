@@ -24,7 +24,7 @@ type Props = {
   onReorder: (formData: FormData) => Promise<void>;
 };
 
-const LIMITS = { hero: 5, trending: 7 };
+const LIMITS = { hero: 5, trending: 4 };
 
 // ── Article picker ────────────────────────────────────────────
 

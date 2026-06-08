@@ -12,8 +12,6 @@ import {
 import { getPublishedArticles } from "@/repositories/article.repositories";
 import { HomepageClient } from "@/features/homepage/components/homepage-client";
 
-// ── Server Actions ────────────────────────────────────────────
-
 async function actionAdd(formData: FormData) {
   "use server";
   const slot = formData.get("slot") as "hero" | "trending" | "live";
@@ -41,8 +39,6 @@ async function actionReorder(formData: FormData) {
   revalidatePath("/admin/homepage");
   revalidatePath("/");
 }
-
-// ── Page ─────────────────────────────────────────────────────
 
 export default async function HomepagePage() {
   const [heroSlots, trendingSlots, liveSlots, allArticles] = await Promise.all([

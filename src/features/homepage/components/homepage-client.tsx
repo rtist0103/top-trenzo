@@ -15,6 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import type { FeaturedSlot } from "@/repositories/featured-slots.repositories";
 import type { PublicArticle } from "@/repositories/article.repositories";
 
+type SlotKey = "hero" | "trending" | "live";
+
 type Props = {
   heroSlots: FeaturedSlot[];
   trendingSlots: FeaturedSlot[];
@@ -25,7 +27,7 @@ type Props = {
   onReorder: (formData: FormData) => Promise<void>;
 };
 
-const LIMITS = { hero: 5, trending: 4, live: 10 };
+const LIMITS: Record<SlotKey, number> = { hero: 5, trending: 4, live: 10 };
 
 // ── Article picker ────────────────────────────────────────────
 
@@ -38,7 +40,7 @@ function ArticlePicker({
 }: {
   articles: PublicArticle[];
   usedIds: Set<string>;
-  slot: "hero" | "trending" | "live";
+  slot: SlotKey;
   slotCount: number;
   onAdd: (formData: FormData) => Promise<void>;
 }) {
@@ -288,7 +290,7 @@ function SectionPanel({
   description: string;
   icon: typeof Star;
   slots: FeaturedSlot[];
-  slot: "hero" | "trending" | "live";
+  slot: SlotKey;
   allArticles: PublicArticle[];
   onAdd: (formData: FormData) => Promise<void>;
   onRemove: (formData: FormData) => Promise<void>;
@@ -384,7 +386,7 @@ export function HomepageClient({
 
       <SectionPanel
         title="Live Ticker Banner"
-        description={`Up to ${LIMITS.live} articles shown in the top live ticker. These articles cycle through as breaking news.`}
+        description={`Up to ${LIMITS.live} articles shown scrolling in the top live ticker.`}
         icon={Radio}
         slots={liveSlots}
         slot="live"

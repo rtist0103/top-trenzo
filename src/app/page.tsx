@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { TrendingUp, ChevronRight, Flame } from "lucide-react";
 
@@ -47,35 +46,38 @@ export async function generateMetadata(): Promise<Metadata> {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [allArticles, featuredHero, featuredTrending, featuredLive, categories] = await Promise.all([
-    getPublishedArticles({ limit: 50 }),
-    getFeaturedArticles("hero", 5),
-    getFeaturedArticles("trending", 4),
-    getFeaturedArticles("live", 10),
-    getAllCategories(),
-  ]);
+  const [allArticles, featuredHero, featuredTrending, featuredLive, categories] =
+    await Promise.all([
+      getPublishedArticles({ limit: 50 }),
+      getFeaturedArticles("hero", 5),
+      getFeaturedArticles("trending", 4),
+      getFeaturedArticles("live", 10),
+      getAllCategories(),
+    ]);
 
-  // Hero: use pinned articles if set, otherwise fall back to latest
-  const carouselArticles = featuredHero.length > 0
-    ? featuredHero
-    : allArticles.slice(0, 4);
+  // Hero carousel: pinned → fallback to latest
+  const carouselArticles =
+    featuredHero.length > 0 ? featuredHero : allArticles.slice(0, 5);
 
-  // Trending: use pinned articles if set, otherwise fall back to latest (limited to 4 items)
-  const mostViewed = featuredTrending.length > 0
-    ? featuredTrending.slice(0, 4)
-    : allArticles.slice(0, 4);
+  // Trending sidebar: pinned → fallback to latest (max 4)
+  const mostViewed =
+    featuredTrending.length > 0
+      ? featuredTrending.slice(0, 4)
+      : allArticles.slice(0, 4);
 
-  // Live ticker: use pinned articles if set, otherwise fall back to most viewed (limited to 10)
-  const liveTickerArticles = featuredLive.length > 0
-    ? featuredLive.slice(0, 10)
-    : mostViewed.slice(0, 10);
+  // Live ticker: pinned → fallback to trending (max 10)
+  // This is a SEPARATE slot from trending — managed independently in admin
+  const tickerArticles =
+    featuredLive.length > 0
+      ? featuredLive.slice(0, 10)
+      : mostViewed.slice(0, 10);
 
   const latestArticles = allArticles;
 
   return (
     <PublicLayout>
-      {/* ── LIVE TICKER BANNER — uses pinned live articles (max 10) ── */}
-      {liveTickerArticles.length > 0 && (
+      {/* ── LIVE TICKER — uses "live" slot, NOT trending ── */}
+      {tickerArticles.length > 0 && (
         <div className="ticker-bar mb-6 overflow-hidden rounded-lg flex">
           <span className="ticker-label">
             <span className="ticker-dot live-pulse" />
@@ -83,7 +85,7 @@ export default async function HomePage() {
           </span>
           <div className="overflow-hidden flex-1 py-2 text-xs font-bold">
             <div className="ticker-content">
-              {[...liveTickerArticles, ...liveTickerArticles].map((a, i) => (
+              {[...tickerArticles, ...tickerArticles].map((a, i) => (
                 <Link
                   key={i}
                   href={`/news/${a.slug}`}
@@ -101,34 +103,33 @@ export default async function HomePage() {
       {carouselArticles.length > 0 && (
         <section className="mb-8 p-1">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Main hero - Carousel with fixed height */}
             <div className="lg:col-span-2">
               <HeroCarousel articles={carouselArticles} />
             </div>
 
-            {/* Trending Now - Fixed height matching hero carousel (500px) */}
-            <div className="rounded-2xl border bg-card p-5 shadow-lg flex flex-col" style={{ height: "500px" }}>
-              <div className="section-heading mb-4 flex-shrink-0">
+            {/* Trending Now — uses "trending" slot */}
+            <div className="rounded-2xl border bg-card p-5 shadow-lg flex flex-col h-full">
+              <div className="section-heading mb-4">
                 <h3 className="text-base font-bold uppercase tracking-tight flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-primary" />
                   Trending Now
                 </h3>
               </div>
 
-              <div className="space-y-4 overflow-y-auto scrollbar-thin pr-2 flex-1 min-h-0">
-                {mostViewed.slice(0, 4).map((article, i) => (
+              <div className="space-y-4 overflow-y-auto scrollbar-thin pr-2 flex-1">
+                {mostViewed.map((article, i) => (
                   <Link
                     key={article.id}
                     href={`/news/${article.slug}`}
-                    className="group flex gap-3 flex-shrink-0"
+                    className="group flex gap-3"
                   >
                     <span className="trending-number w-8 shrink-0 mt-0.5 group-hover:text-primary/40!">
                       {String(i + 1).padStart(2, "0")}
                     </span>
 
-                    <div className="min-w-0 flex-1">
+                    <div>
                       {article.category && (
-                        <span className="text-[10px] font-bold text-primary uppercase tracking-wider block">
+                        <span className="text-[10px] font-bold text-primary uppercase tracking-wider">
                           {article.category.name}
                         </span>
                       )}
@@ -151,11 +152,11 @@ export default async function HomePage() {
         </section>
       )}
 
-      <Separator className="mb-8"/>
+      <Separator className="mb-8" />
 
-      {/* ── MAIN CONTENT (Full Width) ── */}
+      {/* ── MAIN CONTENT ── */}
       <div className="space-y-10 min-w-0">
-        {/* ── TOP NEWS BANNER (10 items) ── */}
+        {/* Latest News */}
         {latestArticles.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-5">
@@ -177,7 +178,7 @@ export default async function HomePage() {
               {latestArticles.slice(0, 10).map((article) => (
                 <div
                   key={article.id}
-                  className="w-[280px] sm:w-[320px] shrink-0 snap-start"
+                  className="w-70 sm:w-[320px] shrink-0 snap-start"
                 >
                   <ArticleCard
                     title={article.title}
@@ -194,12 +195,11 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* ── CATEGORY SECTIONS ── */}
+        {/* Category sections */}
         {categories.map((cat, idx) => {
           const catArticles = latestArticles.filter(
             (a) => a.category?.slug === cat.slug,
           );
-
           if (catArticles.length === 0) return null;
 
           return (
@@ -219,12 +219,12 @@ export default async function HomePage() {
                     More <ChevronRight className="h-4 w-4" />
                   </Link>
                 </div>
-                
+
                 <div className="flex gap-5 overflow-x-auto pb-4 scrollbar-thin snap-x snap-mandatory scroll-smooth w-full">
                   {catArticles.slice(0, 8).map((article) => (
                     <div
                       key={article.id}
-                      className="w-[280px] sm:w-[320px] shrink-0 snap-start"
+                      className="w-70 sm:w-[320px] shrink-0 snap-start"
                     >
                       <ArticleCard
                         title={article.title}
@@ -240,7 +240,6 @@ export default async function HomePage() {
                 </div>
               </section>
 
-              {/* Inject Newsletter after the first category */}
               {idx === 0 && (
                 <div className="rounded-2xl bg-primary text-primary-foreground p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-md">
                   <div className="flex items-center gap-4 text-center md:text-left">

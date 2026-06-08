@@ -10,7 +10,10 @@ const ARTICLE_SELECT = `
 `;
 
 function normalize(row: {
-  categories?: { name: string; slug: string } | { name: string; slug: string }[] | null;
+  categories?:
+    | { name: string; slug: string }
+    | { name: string; slug: string }[]
+    | null;
   [key: string]: unknown;
 }): PublicArticle {
   const { categories, ...rest } = row;
@@ -31,7 +34,6 @@ export async function getFeaturedArticles(
 ): Promise<PublicArticle[]> {
   const supabase = await createClient();
 
-  // Step 1: get ordered article IDs from the slots table
   const { data: slots, error: slotsError } = await supabase
     .from("featured_slots")
     .select("article_id, sort_order")
@@ -44,7 +46,6 @@ export async function getFeaturedArticles(
 
   const orderedIds = slots.map((s) => s.article_id as string);
 
-  // Step 2: fetch the actual articles by ID
   const { data: articles, error: articlesError } = await supabase
     .from("articles")
     .select(ARTICLE_SELECT)
@@ -54,18 +55,20 @@ export async function getFeaturedArticles(
   if (articlesError) throw new Error(articlesError.message);
   if (!articles || articles.length === 0) return [];
 
-  // Step 3: re-sort to match the slot order (DB .in() doesn't guarantee order)
-  const articleMap = new Map(
-    articles.map((a) => [a.id as string, a]),
-  );
+  const articleMap = new Map(articles.map((a) => [a.id as string, a]));
 
   return orderedIds
     .map((id) => articleMap.get(id))
-    .filter((a): a is typeof articles[number] => a !== null && a !== undefined)
+    .filter(
+      (a): a is (typeof articles)[number] => a !== null && a !== undefined,
+    )
     .map((a) =>
       normalize(
         a as {
-          categories?: { name: string; slug: string } | { name: string; slug: string }[] | null;
+          categories?:
+            | { name: string; slug: string }
+            | { name: string; slug: string }[]
+            | null;
           [key: string]: unknown;
         },
       ),
@@ -89,16 +92,20 @@ export type FeaturedSlot = {
   };
 };
 
-export async function getFeaturedSlots(slot: SlotType): Promise<FeaturedSlot[]> {
+export async function getFeaturedSlots(
+  slot: SlotType,
+): Promise<FeaturedSlot[]> {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("featured_slots")
-    .select(`
+    .select(
+      `
       id, slot, article_id, sort_order,
       articles ( id, title, slug, featured_image, published_at,
         categories ( name ) )
-    `)
+    `,
+    )
     .eq("slot", slot)
     .order("sort_order", { ascending: true });
 
@@ -126,56 +133,78 @@ export async function addFeaturedSlot(
   sortOrder: number,
 ): Promise<void> {
   const supabase = await createClient();
-  const { error } = await supabase
+
+  // Check if this article is already in this slot
+  const { data: existing, error: checkError } = await supabase
     .from("featured_slots")
-    .upsert({ slot, article_id: articleId, sort_order: sortOrder });
-  if (error) throw new Error(error.message);
+    .select("id")
+    .eq("slot", slot)
+    .eq("article_id", articleId)
+    .single();
+
+  // PGRST116 = "no rows found" which is expected
+  if (checkError && checkError.code !== "PGRST116") {
+    throw new Error(checkError.message);
+  }
+
+  if (existing) {
+    // Already in slot — update sort_order only
+    const { error: updateError } = await supabase
+      .from("featured_slots")
+      .update({ sort_order: sortOrder })
+      .eq("id", existing.id);
+    if (updateError) throw new Error(updateError.message);
+    return;
+  }
+
+  // Insert new row
+  const { error: insertError } = await supabase
+    .from("featured_slots")
+    .insert({ slot, article_id: articleId, sort_order: sortOrder });
+  if (insertError) throw new Error(insertError.message);
 }
 
 export async function removeFeaturedSlot(id: string): Promise<void> {
   const supabase = await createClient();
-  
-  // Get the slot and sort_order of the item being deleted
-  const { data: slot, error: fetchError } = await supabase
+
+  const { data: target, error: fetchError } = await supabase
     .from("featured_slots")
-    .select("slot, sort_order")
+    .select("slot")
     .eq("id", id)
     .single();
-  
-  if (fetchError) throw new Error(fetchError.message);
-  if (!slot) throw new Error("Slot not found");
 
-  // Delete the item
+  if (fetchError) throw new Error(fetchError.message);
+  if (!target) throw new Error("Slot not found");
+
   const { error: deleteError } = await supabase
     .from("featured_slots")
     .delete()
     .eq("id", id);
-  
   if (deleteError) throw new Error(deleteError.message);
 
-  // Renumber remaining items in this slot to fill the gap
+  // Renumber remaining items sequentially
   const { data: remaining, error: remainingError } = await supabase
     .from("featured_slots")
-    .select("id, sort_order")
-    .eq("slot", slot.slot)
+    .select("id")
+    .eq("slot", target.slot)
     .order("sort_order", { ascending: true });
 
   if (remainingError) throw new Error(remainingError.message);
-  
   if (!remaining || remaining.length === 0) return;
 
-  // Update all items with sequential sort_order
-  // Type assertion needed because TypeScript doesn't narrow array type after length check
-  const itemsToUpdate = remaining as Array<{ id: string; sort_order: number }>;
-  
-  for (const [index, item] of itemsToUpdate.entries()) {
-  const { error: updateError } = await supabase
-    .from("featured_slots")
-    .update({ sort_order: index })
-    .eq("id", item.id);
+  const rows = remaining as Array<{ id: string }>;
 
-  if (updateError) throw new Error(updateError.message);
-}
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row) continue;
+
+    const { error: updateError } = await supabase
+      .from("featured_slots")
+      .update({ sort_order: i })
+      .eq("id", row.id);
+
+    if (updateError) throw new Error(updateError.message);
+  }
 }
 
 export async function reorderFeaturedSlot(
@@ -184,7 +213,6 @@ export async function reorderFeaturedSlot(
 ): Promise<void> {
   const supabase = await createClient();
 
-  // Step 1: Get the slot
   const { data: movedItem, error: fetchError } = await supabase
     .from("featured_slots")
     .select("slot")
@@ -194,43 +222,29 @@ export async function reorderFeaturedSlot(
   if (fetchError) throw new Error(fetchError.message);
   if (!movedItem) throw new Error("Item not found");
 
-  const { slot } = movedItem;
-
-  // Step 2: Get all items in this slot
   const { data: allItems, error: listError } = await supabase
     .from("featured_slots")
-    .select("id, sort_order")
-    .eq("slot", slot)
+    .select("id")
+    .eq("slot", movedItem.slot)
     .order("sort_order", { ascending: true });
 
   if (listError) throw new Error(listError.message);
   if (!allItems || allItems.length === 0) return;
 
-  const items = allItems as Array<{
-    id: string;
-    sort_order: number;
-  }>;
+  const items = allItems as Array<{ id: string }>;
 
-  // Step 3: Create new order
-  const itemsWithoutMoved = items.filter(
-    (item) => item.id !== id,
-  );
+  // Remove moved item, insert at new position, renumber
+  const without = items.filter((item) => item.id !== id);
+  const clamped = Math.max(0, Math.min(newSortOrder, without.length));
+  without.splice(clamped, 0, { id });
 
-  const clampedSortOrder = Math.max(
-    0,
-    Math.min(newSortOrder, itemsWithoutMoved.length),
-  );
+  for (let i = 0; i < without.length; i++) {
+    const item = without[i];
+    if (!item) continue;
 
-  itemsWithoutMoved.splice(clampedSortOrder, 0, {
-    id,
-    sort_order: clampedSortOrder,
-  });
-
-  // Step 4: Update all items
-  for (const [index, item] of itemsWithoutMoved.entries()) {
     const { error: updateError } = await supabase
       .from("featured_slots")
-      .update({ sort_order: index })
+      .update({ sort_order: i })
       .eq("id", item.id);
 
     if (updateError) throw new Error(updateError.message);

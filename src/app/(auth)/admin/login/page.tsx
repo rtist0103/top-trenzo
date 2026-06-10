@@ -48,7 +48,7 @@ export default async function AdminLoginPage() {
               <span className="h-1.5 w-1.5 rounded-full bg-green-400" />
               Admin Dashboard
             </div>
-            <h1 className="text-4xl font-bold leading-tight tracking-tight">
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-red-300">
               India&apos;s short-form<br />news platform.
             </h1>
             <p className="text-white/50 text-base leading-relaxed max-w-sm">

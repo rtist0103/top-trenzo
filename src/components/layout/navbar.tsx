@@ -1,10 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import { Search } from "lucide-react";
 
 import { getSettingsMap } from "@/features/settings/repositories/settings.repositories";
 import { getAllCategories } from "@/repositories/category.repositories";
 import { MobileNav } from "@/components/layout/mobile-nav";
+import { BrandLogo } from "@/components/shared/brand-logo";
 
 export default async function Navbar() {
   const [s, categories] = await Promise.all([
@@ -12,7 +12,6 @@ export default async function Navbar() {
     getAllCategories(),
   ]);
 
-  const logo = s.logo_url || "";
   const siteName = s.site_name || "TopTrenzo";
 
   return (
@@ -20,30 +19,8 @@ export default async function Navbar() {
       <div className="container-wrapper">
         <div className="flex h-14 md:h-16 items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <MobileNav categories={categories} siteName={siteName} />
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-3 shrink-0">
-              {logo ? (
-                <Image
-                  src={logo}
-                  alt={siteName}
-                  width={150}
-                  height={36}
-                  className="object-contain h-9 w-auto"
-                  priority
-                />
-              ) : (
-                <div>
-                  <p className="text-xl font-bold tracking-tight leading-none">
-                    <span>TOP</span>
-                    <span className="text-primary">TRENZO</span>
-                  </p>
-                  <p className="text-[9px] tracking-[0.2em] text-muted-foreground uppercase mt-0.5">
-                    Trends That Matter
-                  </p>
-                </div>
-              )}
-            </Link>
+            <MobileNav categories={categories} siteName={siteName} logoUrl={s.logo_url} />
+            <BrandLogo logoUrl={s.logo_url} siteName={siteName} variant="default" />
           </div>
 
           <div className="hidden md:flex" />

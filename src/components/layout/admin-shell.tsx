@@ -6,13 +6,15 @@ import { SessionTimeout } from "@/features/admin/components/session-timeout";
 type Props = {
   children: ReactNode;
   user: { email: string; name: string };
+  logoUrl: string | null;
+  siteName: string;
 };
 
-export function AdminShell({ children, user }: Props) {
+export function AdminShell({ children, user, logoUrl, siteName }: Props) {
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
       <SessionTimeout />
-      <AdminSidebar />
+      <AdminSidebar logoUrl={logoUrl} siteName={siteName} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <AdminHeader user={user} />
         <main className="flex-1 overflow-y-auto">

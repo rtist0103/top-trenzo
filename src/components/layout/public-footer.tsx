@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 
 import {
   FaFacebookF,
@@ -11,6 +10,7 @@ import {
 
 import { getSettingsMap } from "@/features/settings/repositories/settings.repositories";
 import { getAllCategories } from "@/repositories/category.repositories";
+import { BrandLogo } from "@/components/shared/brand-logo";
 
 export default async function PublicFooter() {
   const [s, categories] = await Promise.all([
@@ -26,7 +26,6 @@ export default async function PublicFooter() {
     { href: s.youtube_url,   icon: FaYoutube,    label: "YouTube"   },
   ].filter((item) => item.href);
 
-  const logo = s.logo_url || "";
   const siteName = s.site_name || "TopTrenzo";
 
   return (
@@ -39,27 +38,12 @@ export default async function PublicFooter() {
 
           {/* ── Brand col ── */}
           <div className="lg:col-span-2">
-            <Link href="/" className="inline-block mb-4">
-              {logo ? (
-                <Image
-                  src={logo}
-                  alt={siteName}
-                  width={150}
-                  height={36}
-                  className="object-contain h-9 w-auto brightness-0 invert"
-                />
-              ) : (
-                <div>
-                  <p className="text-2xl font-bold tracking-tight leading-none">
-                    <span className="text-background">TOP</span>
-                    <span className="text-primary">TRENZO</span>
-                  </p>
-                  <p className="text-[9px] tracking-[0.2em] uppercase mt-1 text-background/50">
-                    Trends That Matter
-                  </p>
-                </div>
-              )}
-            </Link>
+            <BrandLogo
+              logoUrl={s.logo_url}
+              siteName={siteName}
+              variant="inverted"
+              className="mb-4"
+            />
 
             {s.footer_text && (
               <p className="text-sm text-background/60 leading-relaxed max-w-sm mb-6">

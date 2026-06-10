@@ -4,6 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Newspaper, LayoutDashboard, FolderTree, Tag, Users, Settings, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandLogo } from "@/components/shared/brand-logo";
+
+type Props = {
+  logoUrl: string | null;
+  siteName: string;
+};
 
 const navItems = [
   { label: "Dashboard",  href: "/admin",            icon: LayoutDashboard, exact: true },
@@ -15,17 +21,14 @@ const navItems = [
   { label: "Settings",   href: "/admin/settings",   icon: Settings },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({ logoUrl, siteName }: Props) {
   const pathname = usePathname();
 
   return (
     <aside className="hidden md:flex w-60 flex-col shrink-0 border-r bg-zinc-950 dark:bg-zinc-950 text-zinc-100">
       {/* Logo */}
-      <div className="h-16 border-b border-zinc-800 flex items-center gap-2.5 px-5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-          <Newspaper className="h-3.5 w-3.5 text-primary-foreground" />
-        </div>
-        <span className="font-bold text-lg text-white">TopTrenzo</span>
+      <div className="h-16 border-b border-zinc-800 flex items-center px-5">
+        <BrandLogo logoUrl={logoUrl} siteName={siteName} variant="inverted" href="/admin" />
       </div>
 
       {/* Nav */}
@@ -58,7 +61,7 @@ export function AdminSidebar() {
 
       {/* Footer */}
       <div className="p-4 border-t border-zinc-800">
-        <p className="text-xs text-zinc-600">© {new Date().getFullYear()} TopTrenzo. All rights reserved.</p>
+        <p className="text-xs text-zinc-600">© {new Date().getFullYear()} {siteName}. All rights reserved.</p>
       </div>
     </aside>
   );

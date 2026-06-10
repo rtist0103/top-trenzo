@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ShieldCheck, Newspaper, Zap, Globe } from "lucide-react";
 import { GoogleLoginButton } from "@/features/auth/components/google-login-button";
+import { BrandLogo } from "@/components/shared/brand-logo";
+import { getSettingsMap } from "@/features/settings/repositories/settings.repositories";
 
 export const metadata: Metadata = {
   title: "Admin Login — TopTrenzo",
@@ -9,32 +11,34 @@ export const metadata: Metadata = {
 
 const features = [
   { icon: Newspaper, text: "Publish and manage articles" },
-  { icon: Zap, text: "Real-time content updates" },
-  { icon: Globe, text: "Multi-language support" },
+  { icon: Zap,       text: "Real-time content updates"   },
+  { icon: Globe,     text: "Multi-language support"       },
 ];
 
-export default function AdminLoginPage() {
+export default async function AdminLoginPage() {
+  const s = await getSettingsMap();
+  const logoUrl  = s.logo_url  ?? null;
+  const siteName = s.site_name ?? "TopTrenzo";
+
   return (
     <div className="min-h-screen flex">
 
-      {/* ── Left panel ── */}
+      {/* ── Left panel (dark) ── */}
       <div className="hidden lg:flex lg:w-[52%] flex-col justify-between relative overflow-hidden bg-zinc-950 p-14 text-white">
 
-        {/* Background grid */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.04] bg-grid-pattern"
-        />
-
-        {/* Glow */}
+        <div className="pointer-events-none absolute inset-0 opacity-[0.04] bg-grid-pattern" />
         <div className="pointer-events-none absolute -top-40 -left-40 h-125 w-125 rounded-full bg-primary/20 blur-[120px]" />
         <div className="pointer-events-none absolute -bottom-40 -right-40 h-100 w-100 rounded-full bg-blue-500/10 blur-[100px]" />
 
-        {/* Logo */}
-        <div className="relative z-10 flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Newspaper className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold tracking-tight">TopTrenzo</span>
+        {/* Logo — larger, white on dark */}
+        <div className="relative z-10">
+          <BrandLogo
+            logoUrl={logoUrl}
+            siteName={siteName}
+            variant="dark"
+            imageHeight="h-12"
+            href="/"
+          />
         </div>
 
         {/* Copy */}
@@ -52,7 +56,6 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          {/* Feature pills */}
           <div className="space-y-3">
             {features.map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3">
@@ -65,26 +68,27 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        {/* Footer */}
         <p className="relative z-10 text-white/30 text-xs">
-          © {new Date().getFullYear()} TopTrenzo. All rights reserved.
+          © {new Date().getFullYear()} {siteName}. All rights reserved.
         </p>
       </div>
 
-      {/* ── Right panel ── */}
+      {/* ── Right panel (light) ── */}
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-background">
 
-        {/* Mobile logo */}
-        <div className="mb-10 flex items-center gap-2 lg:hidden">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-            <Newspaper className="h-4 w-4 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold">TopTrenzo</span>
+        {/* Mobile logo — larger, centred */}
+        <div className="mb-10 lg:hidden">
+          <BrandLogo
+            logoUrl={logoUrl}
+            siteName={siteName}
+            variant="default"
+            imageHeight="h-12"
+            href="/"
+          />
         </div>
 
         <div className="w-full max-w-85 space-y-7">
 
-          {/* Heading */}
           <div className="space-y-1.5">
             <div className="flex items-center gap-1.5 text-primary">
               <ShieldCheck className="h-4 w-4" />
@@ -96,17 +100,14 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          {/* Card */}
           <div className="rounded-2xl border bg-card shadow-sm p-6 space-y-5">
             <GoogleLoginButton />
-
             <p className="text-center text-xs text-muted-foreground">
               By signing in you agree to our{" "}
               <span className="underline underline-offset-2 cursor-pointer">Terms of Service</span>
             </p>
           </div>
 
-          {/* Security note */}
           <div className="flex items-start gap-2.5 rounded-xl bg-muted/60 border px-3.5 py-3">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
             <p className="text-xs text-muted-foreground leading-relaxed">

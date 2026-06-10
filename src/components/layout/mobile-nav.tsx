@@ -3,16 +3,16 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Menu, X, Home, Newspaper, Search, ChevronRight } from "lucide-react";
+import { BrandLogo } from "@/components/shared/brand-logo";
 
 type Category = { id: string; name: string; slug: string };
-type Props = { categories: Category[]; siteName: string };
+type Props = { categories: Category[]; siteName: string; logoUrl?: string | null };
 
-export function MobileNav({ categories, siteName }: Props) {
+export function MobileNav({ categories, siteName, logoUrl }: Props) {
   const [open, setOpen] = useState(false);
 
   const close = useCallback(() => setOpen(false), []);
 
-  // Lock body scroll when drawer is open
   useEffect(() => {
     if (open) {
       document.body.classList.add("overflow-hidden");
@@ -24,7 +24,6 @@ export function MobileNav({ categories, siteName }: Props) {
     };
   }, [open]);
 
-  // Close on Escape key
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -35,9 +34,9 @@ export function MobileNav({ categories, siteName }: Props) {
   }, [open, close]);
 
   const topLinks = [
-    { href: "/",            label: "Home",          icon: Home      },
-    { href: "/news",        label: "Latest News",   icon: Newspaper },
-    { href: "/search",      label: "Search",        icon: Search    },
+    { href: "/",       label: "Home",        icon: Home      },
+    { href: "/news",   label: "Latest News", icon: Newspaper },
+    { href: "/search", label: "Search",      icon: Search    },
   ];
 
   return (
@@ -51,25 +50,23 @@ export function MobileNav({ categories, siteName }: Props) {
         <Menu className="h-5 w-5" />
       </button>
 
-      {/* Drawer — only mounted when open */}
       {open && (
         <div className="mobile-drawer md:hidden" aria-modal="true" role="dialog">
           {/* Backdrop */}
           <div className="mobile-drawer__backdrop" onClick={close} />
 
-          {/* Panel — slides from left, fully opaque via CSS class */}
+          {/* Panel */}
           <div className="mobile-drawer__panel">
 
             {/* Header */}
             <div className="mobile-drawer__header">
-              <Link
+              <BrandLogo
+                logoUrl={logoUrl}
+                siteName={siteName}
+                variant="default"
                 href="/"
-                onClick={close}
-                className="font-bold text-lg tracking-tight leading-none"
-              >
-                <span>TOP</span>
-                <span className="text-primary">TRENZO</span>
-              </Link>
+                className="pointer-events-auto"
+              />
               <button
                 onClick={close}
                 className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-muted transition-colors"
@@ -79,10 +76,9 @@ export function MobileNav({ categories, siteName }: Props) {
               </button>
             </div>
 
-            {/* Nav — no overflow scroll, everything fits */}
+            {/* Nav */}
             <nav className="flex-1 px-3 py-3 flex flex-col gap-0.5">
 
-              {/* Top links */}
               {topLinks.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
@@ -95,14 +91,12 @@ export function MobileNav({ categories, siteName }: Props) {
                 </Link>
               ))}
 
-              {/* Topics heading */}
               {categories.length > 0 && (
                 <p className="px-4 pt-4 pb-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                   Topics
                 </p>
               )}
 
-              {/* Categories — two-column grid so they all fit without scrolling */}
               {categories.length > 0 && (
                 <div className="grid grid-cols-2 gap-1">
                   {categories.map((cat) => (
